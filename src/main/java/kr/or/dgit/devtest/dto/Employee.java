@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.util.Date;
 
-/**
- * Created by DGIT on 2017-05-10.
- */
 @Data
 public class Employee {
 

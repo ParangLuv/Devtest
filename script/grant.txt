@@ -1,0 +1,7 @@
+﻿CREATE USER 'user_ncs'@'%' ;
+UPDATE mysql.user SET Password=PASSWORD('user_ncs') WHERE User='user_ncs' AND Host='%' ;
+GRANT Create ON *.* TO 'user_ncs'@'%' ;
+GRANT Delete ON *.* TO 'user_ncs'@'%' ;
+GRANT Select ON *.* TO 'user_ncs'@'%' ;
+GRANT Update ON *.* TO 'user_ncs'@'%' ;
+FLUSH PRIVILEGES ;

@@ -4,9 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Created by DGIT on 2017-05-10.
- */
 public class JdbcUtil {
 
     public static void close(Statement stmt){
