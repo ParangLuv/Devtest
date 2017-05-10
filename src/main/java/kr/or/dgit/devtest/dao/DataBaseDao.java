@@ -10,92 +10,51 @@ import java.util.List;
 
 import kr.or.dgit.devtest.jdbc.Config;
 import kr.or.dgit.devtest.jdbc.DBCon;
-import kr.or.dgit.devtest.jdbc.JdbcUtil;
+import kr.or.dgit.devtest.jdbc.DBConnector;
+import kr.or.dgit.devtest.jdbc.SuperDao;
+import kr.or.dgit.devtest.jdbc.DBCloser;
 
-public class DataBaseDao {
+public class DataBaseDao extends SuperDao{
 
-	private PreparedStatement pstmt;
-	private String query = "";
-	private static DataBaseDao instance = new DataBaseDao();
 
-	private DataBaseDao() {
-		System.out.println("DataBaseDao Constructor loaded");
+	public DataBaseDao(DBConnector dbConnector) {
+		super(dbConnector);
 	}
 
-	public static DataBaseDao getInstance() {
-		return instance;
+	
+	public void createDataBase(int dbNo) throws ClassNotFoundException, SQLException{
+		// DB연결
+		con = dbConnector.getConnection();
+		
+		// 데이터베이스 드랍
+		query = "Drop Database if exists " + Config.DB_NAME + dbNo;
+		pstmt = con.prepareStatement(query);
+		pstmt.execute();
+		System.out.printf("Drop Database(%s) Success! %n", Config.DB_NAME + dbNo);
+		
+		// 데이터베이스 생성
+		pstmt = con.prepareStatement("Create Database " + Config.DB_NAME + dbNo);
+		pstmt.execute();
+		System.out.printf("Create Database(%s) Success! %n", Config.DB_NAME + dbNo);
+		
+		// DB연결 종료
+		DBCloser.close(pstmt);
+		System.out.println("DB connection closed");
 	}
 
-	public void createDataBase(int dbNo) {
-		try {
-			Connection con = DBCon.getConnection();
-			pstmt = con.prepareStatement("Drop Database if exists " + Config.DB_NAME + dbNo);
-			pstmt.execute();
-			System.out.printf("Drop Database(%s) Success! %n", Config.DB_NAME + dbNo);
-			pstmt = con.prepareStatement("Create Database " + Config.DB_NAME + dbNo);
-			pstmt.execute();
-			System.out.printf("Create Database(%s) Success! %n", Config.DB_NAME + dbNo);
-		} catch (SQLException e) {
-			System.out.printf("Create Database(%s) Failed! %n", Config.DB_NAME + dbNo);
-			e.printStackTrace();
-		} finally {
-			JdbcUtil.close(pstmt);
-			System.out.println("DB connection closed");
-		}
-	}
 
-	public void createTable(int dbNo) {
-		try {
-			File initSQL = new File(System.getProperty("user.dir") + "\\script\\ddl.txt");
-			List<String> stringList = Files.readAllLines(initSQL.toPath(), StandardCharsets.UTF_8);
-
-			for (String string : stringList) {
-				query += string.replaceAll(".$?--.*", "").replaceAll("(?m)^.*--.*$(\r?\n|\r)?", "")
-						.replaceAll("\\s+", " ").replaceAll("MY_SCHEMA", Config.DB_NAME + dbNo);
-			}
-
-			String[] querys = query.split(";");
-
-			for (String executeQuery : querys) {
-				if (executeQuery.trim().startsWith("insert") || executeQuery.trim().startsWith("update")
-						|| executeQuery.trim().startsWith("delete")) {
-					System.out.println(executeQuery);
-					pstmt.executeUpdate(executeQuery);
-				} else {
-					System.out.println(executeQuery);
-					pstmt.execute(executeQuery);
-				}
-			}
-		} catch (Exception e) {
-			System.out.println("Error 발생");
-			e.printStackTrace();
-		} 
-	}
-
-	public void createUser(int dbNo) {
-		try {
-			String createUser = "grant select, insert, update, delete on " + Config.DB_NAME + dbNo + ".* to user_ncs@'localhost' identified by 'user_ncs';";
-			pstmt.execute(createUser);
-			System.out.println("CreateUser Success");
-		} catch (Exception e) {
-			System.out.println("Error 발생");
-			e.printStackTrace();
-		} finally {
-			JdbcUtil.close(pstmt);
-			System.out.println("DB connection closed");
-		}
-	}
-
-	public void selectUseDatabase(int dbNo) {
-		try {
-			Connection con = DBCon.getConnection();
-			pstmt = con.prepareStatement("USE " + Config.DB_NAME + dbNo);
-			pstmt.execute();
-			System.out.printf("USE DATABASE(%s) Selected Success! %n", Config.DB_NAME + dbNo);
-		} catch (SQLException e) {
-			System.out.printf("USE DATABASE(%s) Selected Fail! %n", Config.DB_NAME + dbNo);
-			e.printStackTrace();
-		} 
-	}
+//
+//
+//	public void selectUseDatabase(int dbNo) throws ClassNotFoundException, SQLException{
+//		try {
+//			Connection con = DBCon.getConnection();
+//			pstmt = con.prepareStatement("USE " + Config.DB_NAME + dbNo);
+//			pstmt.execute();
+//			System.out.printf("USE DATABASE(%s) Selected Success! %n", Config.DB_NAME + dbNo);
+//		} catch (SQLException e) {
+//			System.out.printf("USE DATABASE(%s) Selected Fail! %n", Config.DB_NAME + dbNo);
+//			e.printStackTrace();
+//		} 
+//	}
 
 }

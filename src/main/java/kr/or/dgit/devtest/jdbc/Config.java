@@ -1,5 +1,6 @@
 package kr.or.dgit.devtest.jdbc;
 
+// DB 정보
 public class Config {
     public static final String DB_NAME = "ncs_erp_";
     public static final String USER   = "root";

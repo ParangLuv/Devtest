@@ -4,38 +4,23 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBCon {
 
-    private static DBCon instance = new DBCon();
-    private static Connection con;
+// DB 접속 구현체
+public class DBCon implements DBConnector{
 
-    private DBCon() {
-        try {
-            Class.forName(Config.DRIVER);
-            con = DriverManager.getConnection(Config.URL, Config.USER, Config.PWD);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+	public Connection getConnection() throws ClassNotFoundException, SQLException {
+		Class.forName(Config.DRIVER);
+		Connection con = DriverManager.getConnection(Config.URL, Config.USER, Config.PWD);
+		System.out.println("데이터베이스에 접속에 성공하였습니다.");
+		return con;
+	}
 
-    public static Connection getConnection() {
-        if (instance == null) {
-            new DBCon();
-        }
-        return DBCon.con;
-    }
-
-    public static void closeConnection(){
-        if (con != null){
-            try {
-                con.close();
-                con = null;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+	public void closeConnection(Connection con) throws ClassNotFoundException, SQLException {
+		if (con != null) {
+			con.close();
+			con = null;
+			System.out.println("데이터베이스 접속을 성공적으로 종료하였습니다.");
+		}
+	}
 
 }
